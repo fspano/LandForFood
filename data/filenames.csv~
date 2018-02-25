@@ -1,0 +1,10 @@
+# filename, Food Type, use it to set a scenario
+# this sets the scenario
+# do not leave spaecs betwen the commas in the first line
+#########IMPORTANT add the uncertainty on QB
+fileName,foodType,usage,QB
+"data/FAOSTAT_data_1-27-2018.csv","apples1","Y","450","
+#"data/apples.csv","apples2","Y","450"
+#"data/apples.csv","apples3","N","450"
+
+

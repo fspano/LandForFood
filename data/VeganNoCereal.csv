@@ -1,0 +1,11 @@
+# filename, Food Type, use it to set a scenario
+# this sets the scenario
+# do not leave spaecs betwen the commas in the first line
+#########IMPORTANT add the uncertainty on QB
+#DietName:VeganNoCereal
+#fileName,foodType,usage,QB; QB is expressed  in grams; need uncertainty on QB
+# one might possibly nee duncertainty on produced values i.e. what is the trust we have
+# of the info from FAO
+"data/FAOSTAT_data_1-27-2018.csv","apples1","Y","450"
+#"data/apples.csv","apples2","Y","450"
+#"data/apples.csv","apples3","N","450"

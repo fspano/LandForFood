@@ -1,0 +1,164 @@
+## Authors: Francesco Span\`o <francesco.spano@cern.ch>
+# File and Version Information:#
+#
+# Description:class holding yields (gram/m^2) for a given food type
+# as a function of time (year)  and space(country)
+#
+#Year of first generation: 2104 - October/November in C++,
+#                          rewriting in python Jan 2017
+#==============================================================================
+
+from ROOT import TRandom, TFile, TH1D, TH1F
+from sys import exit
+import numpy as np
+import math
+
+class FoodType:
+    """Class that will calculate all the yields thata are necesssary for the land requirements"""
+        def __init__(self):
+            self.theIngredients={}
+            self.theYields={}
+        #        self.theName = "noFood"
+        #        self.theUsage="N"
+        #        self.theHealtyQuantityPerDay=[]        
+        
+            self.theAverageYieldAndLand=[]
+            self.theVariableNames=[]            
+        #  constants to calculate averages
+        #     scale the yield from Hg/Ha to grams/m^2
+        #       Hg=100g; 1he    ctar =10000m^2 > Hg/Ha= 100g/10000m^2= 1/100 g/m^2  
+            self.scaleFromHgPerHaToGramsPerM2=1/100.
+        # number of days in a year
+            self.DayInAYear=365.        
+            
+        # setting the name of the food type        
+        def setName(self,theName):
+            self.theName = theName
+            # check if this is really what you want to do
+            
+        def setHealthyQuantityPerdDay(self, healthyQuantityPerDay):
+            self.theHealthyQuantityPerDay = healthyQuantityPerDay
+            
+        def setUsage(self,usage):
+            self.theUsage = usage
+            
+        def setVariableNames(self, variableNames):
+            self.theVariableNames=theVariableNames
+            
+        def loadIngredients(self,foodtype,ingredients):
+            # get the yields
+            # save the ingredients  in the appropriate dictionary 
+            self.theIngredients=ingredients
+            # fil the yields in the appropriate dictionary
+            self.getYields(ingredients["filename"])
+        #        ingredients ingredients["filename"]
+        #        ingredients["foodType"]
+        #        ingredients["usage"]
+        #        ingredients["QB"]
+        #        theYields=self.getYields(ingredients["filename"])
+        #        self.theIngredients[foodType]=theYields
+    
+        def getYields(self,csvYieldsFile):
+            csvfile=open(csvYieldsFile)
+            yieldfile = csv.reader(csvfile, delimiter=',', quotechar='"')
+            
+            # get the rows
+            listOfRows  = [row for row in yieldfile]
+            firstrow=listOfRows[0]
+            
+            # find the position of the four quantities we are interested in:
+            # 'Area' for the name of the country where the food is produced
+            # 'Unit' for the units in qhich the yileds are expressed (usually hg/ha)
+            # 'Value' for the numerical value of the yield
+            # 'Year' for the year the production refers to
+            #  THese 4 words are hard coded as one uses the structure
+            # of the csv files  that one downloads from http://www.fao.org/faostat/en/#data/QC
+        #
+            # observation: strange that the other way of doing this dowes ont seem to be working i.e. 
+            # positionOfCountryName = [idx for idx, word in enumerate(firstrow) if word == 'Area']
+            
+            for idx, word in enumerate(firstrow):
+                #    print idx,word
+                if word == 'Area':
+                    positionOfCountryName=idx
+                if word == 'Unit':
+                    positionOfUnitsforYield=idx
+                if word == 'Value':
+                    positionOfYield=idx
+                if word == 'Year':
+                    positionOfYear=idx
+            
+            # define the dictionary that will hold all the yields info
+            #theYields={}
+            
+            # two stringes used to svae the name of the country in the loop         
+            CountryForList=""
+            
+            # the list that contains the dictionary of 4 quantities shown above
+            # once 
+            infoList=[]
+            # loop over the rows of the csv reader :each row contains
+            # the info about the productionin one year in a given country
+            for row in listOfRows:
+                # skip the first row  where the definitions are 
+                if row[0]=="Domain Code":
+                continue
+            #if the country name that was saved is the same as the name found in the incoming row
+            #go on beyond the if,else construct
+                if CountryForList == row[positionOfCountryName] :
+                    pass
+                else:
+                #if the country name that was saved is diferent from the name found in the incoming row
+                # the list of rowas corresponding to a given country is over so
+                # copy the list into the dictionary with a key corresponding to the contry name
+                # technical detail: to copy the list to another one, notice that
+                #                   one uses a=list(b) to generate a new list
+                #                   in fact a=b betwen two lists is just assigning the reference
+                #                   to the same list to two different names
+                #                   see https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
+                    self.theYields[CountryForList]=list(infoList)
+                # empty the list
+                    del infoList[:]
+                # assign a new name to the country
+                    CountryForList=row[positionOfCountryName]
+                
+                # extract the Unit, the year and the Yield from the current row,
+                # make a dictionary associated to them and save the dictionary in a list
+                Unit=row[positionOfUnitsforYield]
+                Year=row[positionOfYear]
+                Yield=row[positionOfYield]
+                infoList.append({"Year":Year,"Unit":Unit,"Yield":Yield})
+                # set the dictionary
+                #self.theYields=theYields
+                
+                # TODO
+                # 1 add uncertainties ONLY AFTER THE rest is calculated and working
+                # given a certain type of food and the necessary quantity per day
+                # one calculates the average Yield and the associated land
+                # 2 add  calculateAverageYieldAndLand(self):
+        
+        #def calculateOverallAverageLand(self,healthyQuanPerDay):
+        
+        
+        def calculateOverallAverageLand(self,theYear=None,theState=None):    
+        # now
+        # for country, infoList in self.theYields.iteritems()
+            self.theYields.values()
+            theYieldsforAState=np.array([yieldInfo["Yield"] for yieldInfo in self.theYields[theState]])
+#now I need to do the following operation: how do I broadcast it
+# ned to check the results are not zero
+      theYieldsforAState.reciprocal()
+
+        averageLand=np.average(theLands)
+        RMSLand=np.std(theLands,ddof=theLands.shape())
+        averageLandUncertainty=RMSLand/math.sqrt(theLands.shape())
+        
+      theHealthyQuantityPerDay*DaysInAYear/theYield
+      (theLands.shape()
+        
+        
+    def getAverageYieldAndLand(self):
+
+
+        
+    return
